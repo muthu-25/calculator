@@ -22,19 +22,56 @@ document.getElementById('subtract').addEventListener('click', () => inputOperato
 document.getElementById('multiply').addEventListener('click', () => inputOperator('*'));
 document.getElementById('divide').addEventListener('click', () => inputOperator('/'));
 document.getElementById('clear').addEventListener('click', () => clear());
+document.getElementById('equals').addEventListener('click', () => performCalculation())
 
 function inputNumber(digit) {
-    if(calculator.displayValue === '0'){
-    calculator.displayValue = digit;
+    if(calculator.waitingForOperand){
+    
+        calculator.displayValue = digit;
+        calculator.waitingForOperand = false;
+    }else if(calculator.displayValue === '0'){
+        calculator.displayValue = digit;
     }
     else{
-    calculator.displayValue += digit;
+        calculator.displayValue += digit;
     }
     updateDisplay()
 }
 
+function inputOperator(nextOperator){
+    const inputValue = parseFloat(calculator.displayValue);
+
+    if (calculator.firstOperand === null){
+        calculator.firstOperand = inputValue;
+    }else if (calculator.displayValue){
+        const result = calculate(calculator.firstOperand, inputValue, calculator.operator);
+        calculator.displayValue = String(result);
+        calculator.firstOperand = result;
+        updateDisplay();
+    };
+    calculator.waitingForOperand = true;
+    calculator.operator = nextOperator;
+
+}
+
 function updateDisplay(){
     document.getElementById('input').value = calculator.displayValue;
+
+}
+
+function calculate(firstOperand, secondOperand, operator){
+    switch(operator){
+        case '+':
+            return firstOperand + secondOperand;
+        case '-':
+            return firstOperand - secondOperand;
+        case '*':
+            return firstOperand * secondOperand;
+        case '/':
+            return firstOperand / secondOperand;
+        default:
+            return secondOperand;
+    } 
 }
 
 function clear() {
@@ -43,4 +80,17 @@ function clear() {
     calculator.waitingForOperand = false;
     calculator.operator = null;
     updateDisplay();
+}
+
+function performCalculation(){
+    const inputValue = parseFloat(calculator.displayValue);
+
+    if (calculator.firstOperand != null && calculator.operator){
+        const result = calculate(calculator.firstOperand, inputValue, calculator.operator);
+        calculator.displayValue = String(result);
+        calculator.firstOperand = null;
+        calculator.operator = null;
+        calculator.waitingForOperand = false;
+        updateDisplay()
+    }
 }
